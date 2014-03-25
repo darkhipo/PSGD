@@ -1,0 +1,49 @@
+1. for each worker, it is running independently on the each thread, only for one iteration of SGD
+input: subData, a piece of data randomly spitted from the whole data set 
+       parameter: oldWeights, weight vector for all regressors
+output: newWeights, new weight vector after training on subData
+
+function worker (subData, oldWeights)
+    for each dataItem i in subData 
+        newWeights[i] = SGD (subData[i], oldWeights)
+    end
+
+return newWeights
+
+2. Synchronization, 
+given each worker finished training on their piece of subData, combine their 
+output newWeights into weights after one iteration of training of the whole data set
+
+input: newWeights[nWorker], newWeights output from each worker
+output: weights, combined (averaged) weights from the newWeights by each worker
+        used as the oldWeights for the next iteration
+
+function Sync (newWeights[nWorker])
+    weights = average(all newWeights from newWeights[nWorker])
+    return weights
+
+
+
+3. The whole training framework
+input: nIter, number of iterations of training
+       data, the whole dataset
+       nWorker, # of workers(threads)
+
+fucntion Train (data, nIter, nWorker)
+    random init oldWeights
+
+    for iter = 1 : nIter 
+        subData[nWorker] = randSplit(data)
+        // step 1, 
+        do Parallel for each worker
+            newWeights[workerIdx] = function worker (subData, oldWeights)
+        end
+        // step 2, synchronization
+        oldWeights = Sync(newWeights[nWorker])    
+    end
+
+    return oldWeights
+end
+
+
+
